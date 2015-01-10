@@ -53,25 +53,55 @@
 }
 
 - (SEL)selectorForTransitionToState:(NSString *)stateName {
-    return [self.selectorConstructor selectorWithComponents:@[@"transitionFrom", self.currentState, @"to", stateName]];
+    return [[[SKSelectorConstructor new] initWithComponents:@[@"transitionFrom", self.currentState, @"to", stateName]] selector];
 }
+
+@end
+
+
+
+@interface SKSelectorConstructor ()
+
+@property (nonatomic, strong) NSMutableArray *selectorComponents;
+
 
 @end
 
 @implementation SKSelectorConstructor
 
-- (SEL)selectorWithComponents:(NSArray *)components {
-    NSString *selectorName = [components componentsJoinedByString:@"-"];
-    NSMutableArray *selectorComponents = [[selectorName componentsSeparatedByString:@":"] mutableCopy];
+- (instancetype)initWithComponents:(NSArray *)components {
+    self = [super init];
+    if (!self) return nil;
     
-    for (NSInteger i = 0; i < selectorComponents.count; i++) {
-        NSString *component = selectorComponents[i];
-        [selectorComponents replaceObjectAtIndex:i withObject:[self llamaCasedString:component]];
-    }
+    _components = components;
+    
+    return self;
+}
 
-    selectorName = [selectorComponents componentsJoinedByString:@":"];
+- (SEL)selector {
+    for (NSInteger i = 0; i < self.selectorComponents.count; i++) {
+        [self formatSelectorComponentAtIndex:i];
+    }
+    
+    NSString *selectorName = [self.selectorComponents componentsJoinedByString:@":"];
     
     return NSSelectorFromString(selectorName);
+}
+
+- (NSMutableArray *)selectorComponents {
+    if (!_selectorComponents) {
+        self.selectorComponents = [[[self joinedComponents] componentsSeparatedByString:@":"] mutableCopy];
+    }
+    return _selectorComponents;
+}
+
+- (void)formatSelectorComponentAtIndex:(NSInteger)index {
+    NSString *component = self.selectorComponents[index];
+    [self.selectorComponents replaceObjectAtIndex:index withObject:[self llamaCasedString:component]];
+}
+
+- (NSString *)joinedComponents {
+    return [self.components componentsJoinedByString:@"-"];
 }
 
 - (NSString*)llamaCasedString:(NSString*)string {

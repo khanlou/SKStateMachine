@@ -27,7 +27,13 @@
 
 @interface SKSelectorConstructor : NSObject
 
-- (SEL)selectorWithComponents:(NSArray *)components;
+- (instancetype)initWithComponents:(NSArray *)components;
+
+@property (nonatomic, readonly) NSArray *components;
+
+@property (readonly) SEL selector;
+
+
 - (NSString*)llamaCasedString:(NSString*)string;
 - (NSArray *)componentsFromString:(NSString*)string;
 - (NSArray *)componentsSplitOnUppercase:(NSString *)string;
