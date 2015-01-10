@@ -9,7 +9,28 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
+#import "SKStateMachine.h"
+
+@interface SKStateMachineDelegate : NSObject
+
+@end
+
+@implementation SKStateMachineDelegate
+
+- (void)transitionFromLockedToUnlocked {
+    NSLog(@"method called 1");
+}
+
+- (void)transitionFromUnlockedToLocked {
+    NSLog(@"method called 2");
+}
+
+@end
+
 @interface StateMachineTests : XCTestCase
+
+@property (nonatomic, strong) SKStateMachine *stateMachine;
+@property (nonatomic, strong) SKStateMachineDelegate *stateMachineDelegate;
 
 @end
 
@@ -17,24 +38,29 @@
 
 - (void)setUp {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    self.stateMachineDelegate = [SKStateMachineDelegate new];
+    self.stateMachine = [[SKStateMachine alloc] initWithInitialState:@"locked" delegate:self.stateMachineDelegate];
 }
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
+- (void)testBasicStateMachine {
+    
+    XCTAssertNoThrow([self.stateMachine transitionToState:@"unlocked"]);
+    XCTAssertNoThrow([self.stateMachine transitionToState:@"locked"]);
+    XCTAssertThrows([self.stateMachine transitionToState:@"an invalid state"]);
+
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    XCTAssert(YES, @"Pass");
-}
-
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
+- (void)testSelectorConstructor {
+    SKSelectorConstructor *constructor = [SKSelectorConstructor new];
+    
+    XCTAssertEqualObjects(NSStringFromSelector([constructor selectorWithComponents:@[@"hi"]]), @"hi");
+    XCTAssertEqualObjects(NSStringFromSelector([constructor selectorWithComponents:@[@"hi:", @"you:"]]), @"hi:you:");
+    XCTAssertEqualObjects(NSStringFromSelector([constructor selectorWithComponents:@[@"transitionFrom", @"stateName", @"to", @"secondState"]]), @"transitionFromStateNameToSecondState");
+    XCTAssertEqualObjects(NSStringFromSelector([constructor selectorWithComponents:@[@"set", @"somePropertyName", @":"]]), @"setSomePropertyName:");
+    XCTAssertEqualObjects(NSStringFromSelector([constructor selectorWithComponents:@[@"set", @"longURLName", @":"]]), @"setLongUrlName:");
+    XCTAssertEqualObjects(NSStringFromSelector([constructor selectorWithComponents:@[@"set", @"longURLName", @":",@"otherProperty", @"also:"]]), @"setLongUrlName:otherPropertyAlso:");
+    
+    XCTAssertEqualObjects([constructor llamaCasedString:@"heres-a-thing"], @"heresAThing");
 }
 
 @end
