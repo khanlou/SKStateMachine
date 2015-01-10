@@ -60,12 +60,14 @@
 
 @interface SKSelectorConstructor ()
 
-@property (nonatomic, strong) NSMutableArray *selectorComponents;
+@property (nonatomic, readonly) NSMutableArray *selectorComponents;
 
 
 @end
 
 @implementation SKSelectorConstructor
+
+@synthesize selectorComponents = _selectorComponents;
 
 - (instancetype)initWithComponents:(NSArray *)components {
     self = [super init];
@@ -88,7 +90,7 @@
 
 - (NSMutableArray *)selectorComponents {
     if (!_selectorComponents) {
-        self.selectorComponents = [[[self joinedComponents] componentsSeparatedByString:@":"] mutableCopy];
+        _selectorComponents = [[[self joinedComponents] componentsSeparatedByString:@":"] mutableCopy];
     }
     return _selectorComponents;
 }
@@ -102,10 +104,20 @@
     return [self.components componentsJoinedByString:@"-"];
 }
 
+@end
+
+
+
+@interface SKLlamaCaseConverter ()
+
+@property (nonatomic, readonly) NSMutableArray *mutableComponents;
+
 
 @end
 
 @implementation SKLlamaCaseConverter
+
+@synthesize mutableComponents = _mutableComponents;
 
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
@@ -117,40 +129,41 @@
 }
 
 - (NSString *)convertedString {
-    return [self llamaCasedString:self.initialString];
+    if (self.initialString.length == 0) return @"";
+    
+    for (NSInteger i = 0; i < self.mutableComponents.count; i++) {
+        [self formatComponentAtIndex:i];
+    }
+    
+    return [self.mutableComponents componentsJoinedByString:@""];
 }
 
-- (NSString*)llamaCasedString:(NSString*)string {
-    NSMutableArray *components = [[self componentsFromString:string] mutableCopy];
-    
-    for (NSInteger i = 0; i < components.count; i++) {
-        NSString *component = components[i];
-        if (i != 0) {
-            [components replaceObjectAtIndex:i withObject:[component capitalizedString]];
-        }
+- (void)formatComponentAtIndex:(NSInteger)index {
+    if (index == 0) {
+        return;
     }
-    
-    return [components componentsJoinedByString:@""];
+    NSString *component = self.mutableComponents[index];
+    [self.mutableComponents replaceObjectAtIndex:index withObject:[component capitalizedString]];
 }
 
-
-- (NSArray *)componentsFromString:(NSString*)string {
-    if (string.length == 0) return @[];
-    
-    NSCharacterSet *separatorSet = [NSCharacterSet characterSetWithCharactersInString:@" -_"];
-    NSArray *components = [string componentsSeparatedByCharactersInSet:separatorSet];
-    
-    NSMutableArray *allComponents = [NSMutableArray array];
-    for (NSString *component in components) {
-        [allComponents addObjectsFromArray:[self componentsSplitOnUppercase:component]];
-    }
-    
-    for (NSString *component in allComponents.reverseObjectEnumerator) {
-        if (component.length == 0) {
-            [allComponents removeObject:component];
+- (NSMutableArray *)mutableComponents {
+    if (!_mutableComponents) {
+        NSCharacterSet *separatorSet = [NSCharacterSet characterSetWithCharactersInString:@" -_"];
+        NSArray *components = [self.initialString componentsSeparatedByCharactersInSet:separatorSet];
+        
+        NSMutableArray *allComponents = [NSMutableArray array];
+        for (NSString *component in components) {
+            [allComponents addObjectsFromArray:[self componentsSplitOnUppercase:component]];
         }
+        
+        for (NSString *component in allComponents.reverseObjectEnumerator) {
+            if (component.length == 0) {
+                [allComponents removeObject:component];
+            }
+        }
+        _mutableComponents = allComponents;
     }
-    return allComponents;
+    return _mutableComponents;
 }
 
 - (NSArray *)componentsSplitOnUppercase:(NSString *)string {
