@@ -51,8 +51,6 @@
 }
 
 - (void)testSelectorConstructor {
-    SKSelectorConstructor *constructor = [SKSelectorConstructor new];
-    
     XCTAssertEqualObjects(NSStringFromSelector([[[SKSelectorConstructor new] initWithComponents:@[@"hi"]] selector]), @"hi");
     XCTAssertEqualObjects(NSStringFromSelector([[[SKSelectorConstructor new] initWithComponents:@[@"hi:", @"you:"]] selector]), @"hi:you:");
     XCTAssertEqualObjects(NSStringFromSelector([[[SKSelectorConstructor new] initWithComponents:@[@"transitionFrom", @"stateName", @"to", @"secondState"]] selector]), @"transitionFromStateNameToSecondState");
@@ -60,7 +58,7 @@
     XCTAssertEqualObjects(NSStringFromSelector([[[SKSelectorConstructor new] initWithComponents:@[@"set", @"longURLName", @":"]] selector]), @"setLongUrlName:");
     XCTAssertEqualObjects(NSStringFromSelector([[[SKSelectorConstructor new] initWithComponents:@[@"set", @"longURLName", @":",@"otherProperty", @"also:"]] selector]), @"setLongUrlName:otherPropertyAlso:");
     
-    XCTAssertEqualObjects([constructor llamaCasedString:@"heres-a-thing"], @"heresAThing");
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"heres-a-thing"] convertedString], @"heresAThing");
 }
 
 @end

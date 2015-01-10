@@ -58,8 +58,6 @@
 
 @end
 
-
-
 @interface SKSelectorConstructor ()
 
 @property (nonatomic, strong) NSMutableArray *selectorComponents;
@@ -97,11 +95,29 @@
 
 - (void)formatSelectorComponentAtIndex:(NSInteger)index {
     NSString *component = self.selectorComponents[index];
-    [self.selectorComponents replaceObjectAtIndex:index withObject:[self llamaCasedString:component]];
+    [self.selectorComponents replaceObjectAtIndex:index withObject:[[[SKLlamaCaseConverter alloc] initWithString:component] convertedString]];
 }
 
 - (NSString *)joinedComponents {
     return [self.components componentsJoinedByString:@"-"];
+}
+
+
+@end
+
+@implementation SKLlamaCaseConverter
+
+- (instancetype)initWithString:(NSString *)string {
+    self = [super init];
+    if (!self) return nil;
+    
+    _initialString = string;
+    
+    return self;
+}
+
+- (NSString *)convertedString {
+    return [self llamaCasedString:self.initialString];
 }
 
 - (NSString*)llamaCasedString:(NSString*)string {
@@ -171,6 +187,7 @@
     
     return allComponents;
 }
+
 
 
 @end

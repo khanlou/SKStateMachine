@@ -33,9 +33,13 @@
 
 @property (readonly) SEL selector;
 
+@end
 
-- (NSString*)llamaCasedString:(NSString*)string;
-- (NSArray *)componentsFromString:(NSString*)string;
-- (NSArray *)componentsSplitOnUppercase:(NSString *)string;
+@interface SKLlamaCaseConverter : NSObject
+
+- (instancetype)initWithString:(NSString *)string;
+
+@property (nonatomic, readonly) NSString *initialString;
+@property (nonatomic, readonly) NSString *convertedString;
 
 @end
