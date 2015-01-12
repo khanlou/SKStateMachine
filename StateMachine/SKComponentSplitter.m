@@ -47,23 +47,23 @@
     return self;
 }
 
-- (NSArray *)mutableComponents {
-    if (!_mutableComponents) {
-        _mutableComponents = [NSMutableArray array];
-    }
-    return _mutableComponents;
+- (NSArray *)components {
+    if (self.string.length == 0) return @[];
+    
+    [self splitStringIntoComponents];
+    [self formatComponentsAndRemoveEmptyComponents];
+    
+    return [self.mutableComponents copy];
 }
 
-- (NSCharacterSet *)separatorSet {
-    return [NSCharacterSet characterSetWithCharactersInString:@" -_"];
-}
-
-- (NSCharacterSet *)lowercaseSet {
-    return [NSCharacterSet lowercaseLetterCharacterSet];
-}
-
-- (NSCharacterSet *)uppercaseSet {
-    return [NSCharacterSet uppercaseLetterCharacterSet];
+- (void)splitStringIntoComponents {
+    __block NSInteger startIndex = 0;
+    __block NSInteger endIndex = 0;
+    [self.indicesToSplitOn enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        endIndex = idx;
+        [self.mutableComponents addObject:[self.string substringWithRange:NSMakeRange(startIndex, endIndex - startIndex)]];
+        startIndex = endIndex;
+    }];
 }
 
 - (NSMutableIndexSet *)indicesToSplitOn {
@@ -76,6 +76,31 @@
         [self.indicesToSplitOn addIndex:self.byteLength];
     }
     return _indicesToSplitOn;
+}
+
+- (void)addIndexIfSplittable {
+    if (self.currentCharIsSeparator) {
+        [self.indicesToSplitOn addIndex:self.currentIndex];
+    }
+    if (self.currentCharIsLowercase && self.nextCharIsUppercase) {
+        [self.indicesToSplitOn addIndex:self.nextIndex];
+    }
+    if (self.currentCharIsUppercase && self.nextCharIsLowercase) {
+        [self.indicesToSplitOn addIndex:self.currentIndex];
+    }
+}
+
+- (void)formatComponentsAndRemoveEmptyComponents {
+    for (NSInteger i = self.mutableComponents.count-1; i >= 0; i--) {
+        NSString *component = self.mutableComponents[i];
+        NSString *formattedComponent = [component lowercaseString];
+        formattedComponent = [formattedComponent stringByTrimmingCharactersInSet:self.separatorSet];
+        if (formattedComponent.length == 0) {
+            [self.mutableComponents removeObjectAtIndex:i];
+        } else {
+            [self.mutableComponents replaceObjectAtIndex:i withObject:formattedComponent];
+        }
+    }
 }
 
 - (void)generateByteLengthAndBuffer {
@@ -104,46 +129,16 @@
     return self.byteLength + 1;
 }
 
-- (void)splitStringIntoComponents {
-    __block NSInteger startIndex = 0;
-    __block NSInteger endIndex = 0;
-    [self.indicesToSplitOn enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-        endIndex = idx;
-        [self.mutableComponents addObject:[self.string substringWithRange:NSMakeRange(startIndex, endIndex - startIndex)]];
-        startIndex = endIndex;
-    }];
+- (NSCharacterSet *)separatorSet {
+    return [NSCharacterSet characterSetWithCharactersInString:@" -_"];
 }
 
-- (void)formatComponentsAndRemoveEmptyComponents {
-    for (NSInteger i = self.mutableComponents.count-1; i >= 0; i--) {
-        NSString *component = self.mutableComponents[i];
-        NSString *formattedComponent = [component lowercaseString];
-        formattedComponent = [formattedComponent stringByTrimmingCharactersInSet:self.separatorSet];
-        if (formattedComponent.length == 0) {
-            [self.mutableComponents removeObjectAtIndex:i];
-        } else {
-            [self.mutableComponents replaceObjectAtIndex:i withObject:formattedComponent];
-        }
-    }
+- (NSCharacterSet *)lowercaseSet {
+    return [NSCharacterSet lowercaseLetterCharacterSet];
 }
 
-- (NSArray *)components {
-    if (self.string.length == 0) return @[];
-    
-    [self splitStringIntoComponents];
-    [self formatComponentsAndRemoveEmptyComponents];
-    
-    return [self.mutableComponents copy];
-}
-
-- (void)addIndexIfSplittable {
-    if (self.currentCharIsSeparator) {
-        [self.indicesToSplitOn addIndex:self.currentIndex];
-    } else if (self.currentCharIsLowercase && self.nextCharIsUppercase) {
-        [self.indicesToSplitOn addIndex:self.nextIndex];
-    } else if (self.currentCharIsUppercase && self.nextCharIsLowercase) {
-        [self.indicesToSplitOn addIndex:self.currentIndex];
-    }
+- (NSCharacterSet *)uppercaseSet {
+    return [NSCharacterSet uppercaseLetterCharacterSet];
 }
 
 - (BOOL)currentCharIsSeparator {
@@ -166,16 +161,23 @@
     return [self.lowercaseSet characterIsMember:self.nextChar];
 }
 
-- (unichar)currentChar {
-    return self.buffer[self.currentIndex];
-}
-
 - (unichar)nextChar {
     return self.nextIndex < self.byteLength ? self.buffer[self.nextIndex] : ' ';
 }
 
 - (NSInteger)nextIndex {
     return self.currentIndex + 1;
+}
+
+- (unichar)currentChar {
+    return self.buffer[self.currentIndex];
+}
+
+- (NSArray *)mutableComponents {
+    if (!_mutableComponents) {
+        _mutableComponents = [NSMutableArray array];
+    }
+    return _mutableComponents;
 }
 
 - (void)dealloc {
