@@ -135,7 +135,10 @@
         [self formatComponentAtIndex:i];
     }
     
-    return [self.mutableComponents componentsJoinedByString:@""];
+    NSString *thing = [self.mutableComponents componentsJoinedByString:@""];
+    NSLog(@"converted string %@", thing);
+    
+    return thing;
 }
 
 - (void)formatComponentAtIndex:(NSInteger)index {
@@ -148,59 +151,94 @@
 
 - (NSMutableArray *)mutableComponents {
     if (!_mutableComponents) {
-        NSCharacterSet *separatorSet = [NSCharacterSet characterSetWithCharactersInString:@" -_"];
-        NSArray *components = [self.initialString componentsSeparatedByCharactersInSet:separatorSet];
-        
-        NSMutableArray *allComponents = [NSMutableArray array];
-        for (NSString *component in components) {
-            [allComponents addObjectsFromArray:[self componentsSplitOnUppercase:component]];
-        }
-        
-        for (NSString *component in allComponents.reverseObjectEnumerator) {
-            if (component.length == 0) {
-                [allComponents removeObject:component];
-            }
-        }
-        _mutableComponents = allComponents;
+        _mutableComponents = [[[[SKComponentSplitter alloc] initWithString:self.initialString] components] mutableCopy];
     }
     return _mutableComponents;
 }
 
-- (NSArray *)componentsSplitOnUppercase:(NSString *)string {
-    NSMutableString *mutableString = [string mutableCopy];
+
+@end
+
+
+@interface SKComponentSplitter ()
+
+@property (nonatomic, readonly) NSMutableArray *mutableComponents;
+
+
+@end
+
+@implementation SKComponentSplitter
+
+@synthesize mutableComponents = _mutableComponents;
+
+- (instancetype)initWithString:(NSString *)string {
+    self = [super init];
+    if (!self) return nil;
     
-    NSArray *lowercaseComponents = [string componentsSeparatedByCharactersInSet:[NSCharacterSet uppercaseLetterCharacterSet]];
+    _string = string;
     
-    NSMutableArray *allComponents = [NSMutableArray array];
-    for (NSString *incompleteComponent in lowercaseComponents) {
-        if (incompleteComponent.length == 0) continue;
-        
-        NSRange rangeOfIncompleteComponent = [mutableString rangeOfString:incompleteComponent];
-        
-        if (rangeOfIncompleteComponent.location > 1) {
-            NSRange rangeOfUppercaseComponent = NSMakeRange(0, rangeOfIncompleteComponent.location-1);
-            NSString *uppercaseComponent = [mutableString substringWithRange:rangeOfUppercaseComponent];
-            
-            [mutableString deleteCharactersInRange:rangeOfUppercaseComponent];
-            
-            [allComponents addObject:[uppercaseComponent lowercaseString]];
-            rangeOfIncompleteComponent = [mutableString rangeOfString:incompleteComponent];
-        }
-        NSRange rangeOfFullComponent = NSMakeRange(0, rangeOfIncompleteComponent.length + rangeOfIncompleteComponent.location);
-        NSString *fullComponent = [mutableString substringWithRange:rangeOfFullComponent];
-        
-        [mutableString deleteCharactersInRange:rangeOfFullComponent];
-        
-        [allComponents addObject:[fullComponent lowercaseString]];
-    }
-    
-    if (mutableString.length != 0) {
-        [allComponents addObject:[mutableString lowercaseString]];
-    }
-    
-    return allComponents;
+    return self;
 }
 
+- (NSArray *)mutableComponents {
+    if (!_mutableComponents) {
+        _mutableComponents = [NSMutableArray array];
+    }
+    return _mutableComponents;
+}
+
+- (NSCharacterSet *)separatorSet {
+    return [NSCharacterSet characterSetWithCharactersInString:@" -_"];
+}
+
+- (NSCharacterSet *)lowercaseSet {
+    return [NSCharacterSet lowercaseLetterCharacterSet];
+}
+
+- (NSCharacterSet *)uppercaseSet {
+    return [NSCharacterSet uppercaseLetterCharacterSet];
+}
+
+
+- (NSArray *)components {
+    NSInteger byteLength = [self.string lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+    char bufferCopy[byteLength+1];
+    strncpy(bufferCopy, [self.string cStringUsingEncoding:NSUTF8StringEncoding], byteLength);
+    
+    NSMutableString *currentComponent = [NSMutableString string];
+    for (NSInteger i = 0; i < byteLength; i++) {
+        unichar currentChar = bufferCopy[i];
+        unichar lookahead = i+1 < byteLength ? bufferCopy[i+1] : ' ';
+        if ([[self separatorSet] characterIsMember:currentChar]) {
+            [self.mutableComponents addObject:currentComponent];
+            currentComponent = [NSMutableString string];
+        } else if ([[self uppercaseSet] characterIsMember:currentChar] && [[self uppercaseSet] characterIsMember:lookahead]) {
+            [currentComponent appendFormat:@"%C", currentChar];
+        } else if ([[self lowercaseSet] characterIsMember:currentChar] && [[self uppercaseSet] characterIsMember:lookahead]) {
+            [currentComponent appendFormat:@"%C", currentChar];
+            [self.mutableComponents addObject:currentComponent];
+            currentComponent = [NSMutableString string];
+        } else if ([[self uppercaseSet] characterIsMember:currentChar] && [[self lowercaseSet] characterIsMember:lookahead]) {
+            [self.mutableComponents addObject:currentComponent];
+            currentComponent = [NSMutableString string];
+            [currentComponent appendFormat:@"%C", currentChar];
+        } else {
+            [currentComponent appendFormat:@"%C", currentChar];
+        }
+    }
+    [self.mutableComponents addObject:currentComponent];
+    
+    for (NSInteger i = 0; i < self.mutableComponents.count; i++) {
+        NSString *component = self.mutableComponents[i];
+        if (component.length == 0) {
+            [self.mutableComponents removeObjectAtIndex:i];
+        } else {
+            [self.mutableComponents replaceObjectAtIndex:i withObject:[component lowercaseString]];
+        }
+    }
+    
+    return self.mutableComponents;
+}
 
 
 @end

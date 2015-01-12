@@ -43,3 +43,14 @@
 @property (nonatomic, readonly) NSString *convertedString;
 
 @end
+
+@interface SKComponentSplitter : NSObject
+
+- (instancetype)initWithString:(NSString *)string;
+
+@property (nonatomic, readonly) NSString *string;
+
+@property (nonatomic, retain) NSArray *components;
+
+@end
+

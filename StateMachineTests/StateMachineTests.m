@@ -61,4 +61,13 @@
     XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"heres-a-thing"] convertedString], @"heresAThing");
 }
 
+- (void)testLlamaCasing {
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"heres-a-thing"] convertedString], @"heresAThing");
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"heres_a_thing"] convertedString], @"heresAThing");
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"heres a thing"] convertedString], @"heresAThing");
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"aURLProperty"] convertedString], @"aUrlProperty");
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"longURLProperty"] convertedString], @"longUrlProperty");
+    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"URLPropertyName"] convertedString], @"urlPropertyName");
+}
+
 @end
