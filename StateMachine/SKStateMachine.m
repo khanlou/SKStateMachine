@@ -204,13 +204,11 @@
     strncpy(bufferCopy, [self.string cStringUsingEncoding:NSUTF8StringEncoding], byteLength);
     
     NSMutableIndexSet *indicesToSplitOn = [NSMutableIndexSet indexSet];
-    NSMutableIndexSet *indicesToRemove = [NSMutableIndexSet indexSet];
     
     for (NSInteger i = 0; i < byteLength; i++) {
         unichar currentChar = bufferCopy[i];
         unichar lookahead = i+1 < byteLength ? bufferCopy[i+1] : ' ';
         if ([[self separatorSet] characterIsMember:currentChar]) {
-            [indicesToRemove addIndex:i];
             [indicesToSplitOn addIndex:i];
         } else if ([[self lowercaseSet] characterIsMember:currentChar] && [[self uppercaseSet] characterIsMember:lookahead]) {
             [indicesToSplitOn addIndex:i+1];
