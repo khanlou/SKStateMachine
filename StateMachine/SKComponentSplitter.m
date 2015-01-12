@@ -133,7 +133,7 @@
     [self splitStringIntoComponents];
     [self formatComponentsAndRemoveEmptyComponents];
     
-    return self.mutableComponents;
+    return [self.mutableComponents copy];
 }
 
 - (void)addIndexIfSplittable {
