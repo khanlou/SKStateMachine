@@ -37,9 +37,12 @@
 }
 
 - (void)formatComponentAtIndex:(NSInteger)index {
-    if (index == 0) {
-        return;
+    if (index != 0) {
+        [self capitalizeComponentAtIndex:index];
     }
+}
+
+- (void)capitalizeComponentAtIndex:(NSInteger)index {
     NSString *component = self.mutableComponents[index];
     [self.mutableComponents replaceObjectAtIndex:index withObject:[component capitalizedString]];
 }

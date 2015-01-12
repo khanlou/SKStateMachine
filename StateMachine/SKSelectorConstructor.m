@@ -32,9 +32,7 @@
     for (NSInteger i = 0; i < self.selectorComponents.count; i++) {
         [self formatSelectorComponentAtIndex:i];
     }
-    
     NSString *selectorName = [self.selectorComponents componentsJoinedByString:@":"];
-    
     return NSSelectorFromString(selectorName);
 }
 
