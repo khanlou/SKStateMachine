@@ -13,9 +13,23 @@
 @property (nonatomic, readonly) NSMutableArray *mutableComponents;
 @property (nonatomic, readonly) NSMutableIndexSet *indicesToSplitOn;
 @property (nonatomic) NSInteger currentIndex;
+@property (readonly) NSInteger nextIndex;
 
 @property (nonatomic) char *buffer;
 @property (nonatomic) NSInteger byteLength;
+
+@property (readonly) BOOL currentCharIsSeparator;
+@property (readonly) BOOL currentCharIsUppercase;
+@property (readonly) BOOL currentCharIsLowercase;
+@property (readonly) BOOL nextCharIsUppercase;
+@property (readonly) BOOL nextCharIsLowercase;
+
+@property (readonly) unichar currentChar;
+@property (readonly) unichar nextChar;
+
+@property (readonly) NSCharacterSet *separatorSet;
+@property (readonly) NSCharacterSet *lowercaseSet;
+@property (readonly) NSCharacterSet *uppercaseSet;
 
 
 @end
@@ -104,7 +118,7 @@
     for (NSInteger i = self.mutableComponents.count-1; i >= 0; i--) {
         NSString *component = self.mutableComponents[i];
         NSString *formattedComponent = [component lowercaseString];
-        formattedComponent = [formattedComponent stringByTrimmingCharactersInSet:[self separatorSet]];
+        formattedComponent = [formattedComponent stringByTrimmingCharactersInSet:self.separatorSet];
         if (formattedComponent.length == 0) {
             [self.mutableComponents removeObjectAtIndex:i];
         } else {
@@ -123,33 +137,33 @@
 }
 
 - (void)addIndexIfSplittable {
-    if ([self currentCharIsSeparator]) {
+    if (self.currentCharIsSeparator) {
         [self.indicesToSplitOn addIndex:self.currentIndex];
-    } else if ([self currentCharIsLowercase] && [self nextCharIsUppercase]) {
+    } else if (self.currentCharIsLowercase && self.nextCharIsUppercase) {
         [self.indicesToSplitOn addIndex:self.nextIndex];
-    } else if ([self currentCharIsUppercase] && [self nextCharIsLowercase]) {
+    } else if (self.currentCharIsUppercase && self.nextCharIsLowercase) {
         [self.indicesToSplitOn addIndex:self.currentIndex];
     }
 }
 
 - (BOOL)currentCharIsSeparator {
-    return [[self separatorSet] characterIsMember:self.currentChar];
+    return [self.separatorSet characterIsMember:self.currentChar];
 }
 
 - (BOOL)currentCharIsUppercase {
-    return [[self uppercaseSet] characterIsMember:self.currentChar];
+    return [self.uppercaseSet characterIsMember:self.currentChar];
 }
 
 - (BOOL)currentCharIsLowercase {
-    return [[self lowercaseSet] characterIsMember:self.currentChar];
+    return [self.lowercaseSet characterIsMember:self.currentChar];
 }
 
 - (BOOL)nextCharIsUppercase {
-    return [[self uppercaseSet] characterIsMember:self.nextChar];
+    return [self.uppercaseSet characterIsMember:self.nextChar];
 }
 
 - (BOOL)nextCharIsLowercase {
-    return [[self lowercaseSet] characterIsMember:self.nextChar];
+    return [self.lowercaseSet characterIsMember:self.nextChar];
 }
 
 - (unichar)currentChar {
@@ -157,7 +171,7 @@
 }
 
 - (unichar)nextChar {
-    return [self nextIndex] < self.byteLength ? self.buffer[[self nextIndex]] : ' ';
+    return self.nextIndex < self.byteLength ? self.buffer[self.nextIndex] : ' ';
 }
 
 - (NSInteger)nextIndex {
