@@ -70,7 +70,17 @@
     XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"heres a thing"] convertedString], @"heresAThing");
     XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"aURLProperty"] convertedString], @"aUrlProperty");
     XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"longURLProperty"] convertedString], @"longUrlProperty");
-    XCTAssertEqualObjects([[[SKLlamaCaseConverter alloc] initWithString:@"URLPropertyName"] convertedString], @"urlPropertyName");
+    
+    SKLlamaCaseConverter *llamaCaseConverter = [[SKLlamaCaseConverter alloc] initWithString:@"URLPropertyName"];
+    XCTAssertEqualObjects([llamaCaseConverter convertedString], @"urlPropertyName");
+    XCTAssertEqualObjects([llamaCaseConverter convertedString], @"urlPropertyName", @"result should be idempotent");
+}
+
+- (void)testComponents {
+    SKComponentSplitter *componentSplitter = [[SKComponentSplitter alloc] initWithString:@"heres-a-thing"];
+    NSArray *expectedResult =  @[@"heres", @"a", @"thing"];
+    XCTAssertEqualObjects([componentSplitter components], expectedResult);
+    XCTAssertEqualObjects([componentSplitter components], expectedResult, @"result should be idempotent");
 }
 
 @end

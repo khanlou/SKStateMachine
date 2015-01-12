@@ -35,7 +35,7 @@
 
 @implementation SKComponentSplitter
 
-@synthesize mutableComponents = _mutableComponents, indicesToSplitOn = _indicesToSplitOn;
+@synthesize mutableComponents = _mutableComponents, indicesToSplitOn = _indicesToSplitOn, components = _components;
 
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
@@ -47,12 +47,15 @@
 }
 
 - (NSArray *)components {
-    if (self.string.length == 0) return @[];
-    
-    [self splitStringIntoComponents];
-    [self formatComponentsAndRemoveEmptyComponents];
-    
-    return [self.mutableComponents copy];
+    if (!_components) {
+        if (self.string.length == 0) return @[];
+        
+        [self splitStringIntoComponents];
+        [self formatComponentsAndRemoveEmptyComponents];
+        
+        _components = [self.mutableComponents copy];
+    }
+    return _components;
 }
 
 - (void)splitStringIntoComponents {

@@ -14,6 +14,6 @@
 
 @property (nonatomic, readonly) NSString *string;
 
-@property (nonatomic, retain) NSArray *components;
+@property (nonatomic, readonly) NSArray *components;
 
 @end
