@@ -232,15 +232,7 @@
     return self.byteLength + 1;
 }
 
-- (NSArray *)components {
-    if (self.string.length == 0) return @[];
-    
-    for (NSInteger i = 0; i < self.byteLength; i++) {
-        self.currentIndex = i;
-        [self addIndexIfSplittable];
-    }
-    [self.indicesToSplitOn addIndex:self.byteLength];
-    
+- (void)splitStringIntoComponents {
     __block NSInteger startIndex = 0;
     __block NSInteger endIndex = 0;
     [self.indicesToSplitOn enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
@@ -248,7 +240,9 @@
         [self.mutableComponents addObject:[self.string substringWithRange:NSMakeRange(startIndex, endIndex - startIndex)]];
         startIndex = endIndex;
     }];
-    
+}
+
+- (void)formatComponentsAndRemoveEmptyComponents {
     for (NSInteger i = self.mutableComponents.count-1; i >= 0; i--) {
         NSString *component = self.mutableComponents[i];
         NSString *formattedComponent = [component lowercaseString];
@@ -259,6 +253,19 @@
             [self.mutableComponents replaceObjectAtIndex:i withObject:formattedComponent];
         }
     }
+}
+
+- (NSArray *)components {
+    if (self.string.length == 0) return @[];
+    
+    for (NSInteger i = 0; i < self.byteLength; i++) {
+        self.currentIndex = i;
+        [self addIndexIfSplittable];
+    }
+    [self.indicesToSplitOn addIndex:self.byteLength];
+    
+    [self splitStringIntoComponents];
+    [self formatComponentsAndRemoveEmptyComponents];
     
     return self.mutableComponents;
 }
