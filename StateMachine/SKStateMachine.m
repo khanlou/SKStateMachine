@@ -130,15 +130,10 @@
 
 - (NSString *)convertedString {
     if (self.initialString.length == 0) return @"";
-    
     for (NSInteger i = 0; i < self.mutableComponents.count; i++) {
         [self formatComponentAtIndex:i];
     }
-    
-    NSString *thing = [self.mutableComponents componentsJoinedByString:@""];
-    NSLog(@"converted string %@", thing);
-    
-    return thing;
+    return [self.mutableComponents componentsJoinedByString:@""];
 }
 
 - (void)formatComponentAtIndex:(NSInteger)index {
