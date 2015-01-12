@@ -31,7 +31,6 @@
 @property (readonly) NSCharacterSet *lowercaseSet;
 @property (readonly) NSCharacterSet *uppercaseSet;
 
-
 @end
 
 @implementation SKComponentSplitter

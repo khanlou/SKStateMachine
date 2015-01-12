@@ -23,9 +23,19 @@
 
 @implementation SKStateMachine
 
+- (instancetype)init {
+    return [self initWithInitialState:nil delegate:nil];
+}
+
 - (instancetype)initWithInitialState:(NSString *)initialState delegate:(id)delegate {
     self = [super init];
     if (!self) return nil;
+    
+    if (!initialState || initialState.length == 0) {
+        [SKInvalidStateTransitionException raise:@"Invalid State Transition" format:@"An empty string is not a valid initial state."];
+        self = nil;
+        return nil;
+    }
     
     _currentState = initialState;
     _delegate = delegate;
@@ -35,7 +45,7 @@
 }
 
 - (void)transitionToState:(NSString *)stateName {
-    if (stateName) {
+    if (stateName && stateName.length != 0) {
         SEL transitionSelector = [self selectorForTransitionToState:stateName];
         if ([self.delegate respondsToSelector:transitionSelector]) {
             self.currentState = stateName;
@@ -45,8 +55,10 @@
 #pragma clang diagnostic pop
             return;
         }
+        [SKInvalidStateTransitionException raise:@"Invalid State Transition" format:@"The delegate does not respond to transitions from %@ to %@. Implement the method %@ if this is a valid transition.", self.currentState, stateName, NSStringFromSelector(transitionSelector)];
+    } else {
+        [SKInvalidStateTransitionException raise:@"Invalid State Transition" format:@"Empty strings are not valid states to transition to."];
     }
-    [SKInvalidStateTransitionException raise:@"Invalid State Transition!" format:@"The delegate does not respond to transitions of the type thingy."];
 }
 
 - (BOOL)canTransitionToState:(NSString *)stateName {
