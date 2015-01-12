@@ -158,12 +158,18 @@
 @interface SKComponentSplitter ()
 
 @property (nonatomic, readonly) NSMutableArray *mutableComponents;
+@property (nonatomic, readonly) NSMutableIndexSet *indicesToSplitOn;
+@property (nonatomic) NSInteger currentIndex;
+
+@property (nonatomic) char *buffer;
+@property (nonatomic) NSInteger byteLength;
+
 
 @end
 
 @implementation SKComponentSplitter
 
-@synthesize mutableComponents = _mutableComponents;
+@synthesize mutableComponents = _mutableComponents, indicesToSplitOn = _indicesToSplitOn;
 
 - (instancetype)initWithString:(NSString *)string {
     self = [super init];
@@ -193,34 +199,55 @@
     return [NSCharacterSet uppercaseLetterCharacterSet];
 }
 
-- (NSArray *)components {
-    NSInteger byteLength = [self.string lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-    char bufferCopy[byteLength+1];
-    strncpy(bufferCopy, [self.string cStringUsingEncoding:NSUTF8StringEncoding], byteLength);
-    
-    NSMutableIndexSet *indicesToSplitOn = [NSMutableIndexSet indexSet];
-    
-    for (NSInteger i = 0; i < byteLength; i++) {
-        unichar currentChar = bufferCopy[i];
-        unichar lookahead = i+1 < byteLength ? bufferCopy[i+1] : ' ';
-        if ([[self separatorSet] characterIsMember:currentChar]) {
-            [indicesToSplitOn addIndex:i];
-        } else if ([[self lowercaseSet] characterIsMember:currentChar] && [[self uppercaseSet] characterIsMember:lookahead]) {
-            [indicesToSplitOn addIndex:i+1];
-        } else if ([[self uppercaseSet] characterIsMember:currentChar] && [[self lowercaseSet] characterIsMember:lookahead]) {
-            [indicesToSplitOn addIndex:i];
-        }
+- (NSMutableIndexSet *)indicesToSplitOn {
+    if (!_indicesToSplitOn) {
+        _indicesToSplitOn = [NSMutableIndexSet indexSet];
     }
-    [indicesToSplitOn addIndex:byteLength];
+    return _indicesToSplitOn;
+}
+
+- (void)generateByteLengthAndBuffer {
+    self.byteLength = [self.string lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+    char *bufferCopy = (char*)malloc(self.byteLength * sizeof(char));
+    strncpy(bufferCopy, [self.string cStringUsingEncoding:NSUTF8StringEncoding], self.byteLength);
+    
+    self.buffer = bufferCopy;
+}
+
+- (char *)buffer {
+    if (!_buffer) {
+        [self generateByteLengthAndBuffer];
+    }
+    return _buffer;
+}
+
+- (NSInteger)byteLength {
+    if (_byteLength == 0) {
+        [self generateByteLengthAndBuffer];
+    }
+    return _byteLength;
+}
+
+- (NSInteger)bufferLength {
+    return self.byteLength + 1;
+}
+
+- (NSArray *)components {
+    if (self.string.length == 0) return @[];
+    
+    for (NSInteger i = 0; i < self.byteLength; i++) {
+        self.currentIndex = i;
+        [self addIndexIfSplittable];
+    }
+    [self.indicesToSplitOn addIndex:self.byteLength];
     
     __block NSInteger startIndex = 0;
     __block NSInteger endIndex = 0;
-    [indicesToSplitOn enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+    [self.indicesToSplitOn enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
         endIndex = idx;
         [self.mutableComponents addObject:[self.string substringWithRange:NSMakeRange(startIndex, endIndex - startIndex)]];
         startIndex = endIndex;
     }];
-
     
     for (NSInteger i = self.mutableComponents.count-1; i >= 0; i--) {
         NSString *component = self.mutableComponents[i];
@@ -234,6 +261,52 @@
     }
     
     return self.mutableComponents;
+}
+
+- (void)addIndexIfSplittable {
+    if ([self currentCharIsSeparator]) {
+        [self.indicesToSplitOn addIndex:self.currentIndex];
+    } else if ([self currentCharIsLowercase] && [self nextCharIsUppercase]) {
+        [self.indicesToSplitOn addIndex:self.nextIndex];
+    } else if ([self currentCharIsUppercase] && [self nextCharIsLowercase]) {
+        [self.indicesToSplitOn addIndex:self.currentIndex];
+    }
+}
+
+- (BOOL)currentCharIsSeparator {
+    return [[self separatorSet] characterIsMember:self.currentChar];
+}
+
+- (BOOL)currentCharIsUppercase {
+    return [[self uppercaseSet] characterIsMember:self.currentChar];
+}
+
+- (BOOL)currentCharIsLowercase {
+    return [[self lowercaseSet] characterIsMember:self.currentChar];
+}
+
+- (BOOL)nextCharIsUppercase {
+    return [[self uppercaseSet] characterIsMember:self.nextChar];
+}
+
+- (BOOL)nextCharIsLowercase {
+    return [[self lowercaseSet] characterIsMember:self.nextChar];
+}
+
+- (unichar)currentChar {
+    return self.buffer[self.currentIndex];
+}
+
+- (unichar)nextChar {
+    return [self nextIndex] < self.byteLength ? self.buffer[[self nextIndex]] : ' ';
+}
+
+- (NSInteger)nextIndex {
+    return self.currentIndex + 1;
+}
+
+- (void)dealloc {
+    free(self.buffer);
 }
 
 @end
