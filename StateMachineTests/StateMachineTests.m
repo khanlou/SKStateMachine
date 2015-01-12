@@ -46,11 +46,9 @@
 }
 
 - (void)testBasicStateMachine {
-    
     XCTAssertNoThrow([self.stateMachine transitionToState:@"unlocked"]);
     XCTAssertNoThrow([self.stateMachine transitionToState:@"locked"]);
     XCTAssertThrows([self.stateMachine transitionToState:@"an invalid state"]);
-
 }
 
 - (void)testSelectorConstructor {
