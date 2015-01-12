@@ -164,7 +164,6 @@
 
 @property (nonatomic, readonly) NSMutableArray *mutableComponents;
 
-
 @end
 
 @implementation SKComponentSplitter
@@ -199,46 +198,49 @@
     return [NSCharacterSet uppercaseLetterCharacterSet];
 }
 
-
 - (NSArray *)components {
     NSInteger byteLength = [self.string lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
     char bufferCopy[byteLength+1];
     strncpy(bufferCopy, [self.string cStringUsingEncoding:NSUTF8StringEncoding], byteLength);
     
-    NSMutableString *currentComponent = [NSMutableString string];
+    NSMutableIndexSet *indicesToSplitOn = [NSMutableIndexSet indexSet];
+    NSMutableIndexSet *indicesToRemove = [NSMutableIndexSet indexSet];
+    
     for (NSInteger i = 0; i < byteLength; i++) {
         unichar currentChar = bufferCopy[i];
         unichar lookahead = i+1 < byteLength ? bufferCopy[i+1] : ' ';
         if ([[self separatorSet] characterIsMember:currentChar]) {
-            [self.mutableComponents addObject:currentComponent];
-            currentComponent = [NSMutableString string];
-        } else if ([[self uppercaseSet] characterIsMember:currentChar] && [[self uppercaseSet] characterIsMember:lookahead]) {
-            [currentComponent appendFormat:@"%C", currentChar];
+            [indicesToRemove addIndex:i];
+            [indicesToSplitOn addIndex:i];
         } else if ([[self lowercaseSet] characterIsMember:currentChar] && [[self uppercaseSet] characterIsMember:lookahead]) {
-            [currentComponent appendFormat:@"%C", currentChar];
-            [self.mutableComponents addObject:currentComponent];
-            currentComponent = [NSMutableString string];
+            [indicesToSplitOn addIndex:i+1];
         } else if ([[self uppercaseSet] characterIsMember:currentChar] && [[self lowercaseSet] characterIsMember:lookahead]) {
-            [self.mutableComponents addObject:currentComponent];
-            currentComponent = [NSMutableString string];
-            [currentComponent appendFormat:@"%C", currentChar];
-        } else {
-            [currentComponent appendFormat:@"%C", currentChar];
+            [indicesToSplitOn addIndex:i];
         }
     }
-    [self.mutableComponents addObject:currentComponent];
+    [indicesToSplitOn addIndex:byteLength];
     
-    for (NSInteger i = 0; i < self.mutableComponents.count; i++) {
+    __block NSInteger startIndex = 0;
+    __block NSInteger endIndex = 0;
+    [indicesToSplitOn enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        endIndex = idx;
+        [self.mutableComponents addObject:[self.string substringWithRange:NSMakeRange(startIndex, endIndex - startIndex)]];
+        startIndex = endIndex;
+    }];
+
+    
+    for (NSInteger i = self.mutableComponents.count-1; i >= 0; i--) {
         NSString *component = self.mutableComponents[i];
-        if (component.length == 0) {
+        NSString *formattedComponent = [component lowercaseString];
+        formattedComponent = [formattedComponent stringByTrimmingCharactersInSet:[self separatorSet]];
+        if (formattedComponent.length == 0) {
             [self.mutableComponents removeObjectAtIndex:i];
         } else {
-            [self.mutableComponents replaceObjectAtIndex:i withObject:[component lowercaseString]];
+            [self.mutableComponents replaceObjectAtIndex:i withObject:formattedComponent];
         }
     }
     
     return self.mutableComponents;
 }
-
 
 @end
