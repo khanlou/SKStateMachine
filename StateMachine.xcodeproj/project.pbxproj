@@ -16,6 +16,9 @@
 		1A952BB41A61C61A00C6AAC1 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1A952BB21A61C61A00C6AAC1 /* LaunchScreen.xib */; };
 		1A952BC01A61C61A00C6AAC1 /* StateMachineTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A952BBF1A61C61A00C6AAC1 /* StateMachineTests.m */; };
 		1A952BCB1A61C63E00C6AAC1 /* SKStateMachine.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A952BCA1A61C63E00C6AAC1 /* SKStateMachine.m */; };
+		1AFE51D51A639353005301A7 /* SKSelectorConstructor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1AFE51D41A639353005301A7 /* SKSelectorConstructor.m */; };
+		1AFE51D81A63935C005301A7 /* SKLlamaCaseConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1AFE51D71A63935C005301A7 /* SKLlamaCaseConverter.m */; };
+		1AFE51DB1A639366005301A7 /* SKComponentSplitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 1AFE51DA1A639366005301A7 /* SKComponentSplitter.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +49,12 @@
 		1A952BBF1A61C61A00C6AAC1 /* StateMachineTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StateMachineTests.m; sourceTree = "<group>"; };
 		1A952BC91A61C63E00C6AAC1 /* SKStateMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKStateMachine.h; sourceTree = "<group>"; };
 		1A952BCA1A61C63E00C6AAC1 /* SKStateMachine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKStateMachine.m; sourceTree = "<group>"; };
+		1AFE51D31A639353005301A7 /* SKSelectorConstructor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKSelectorConstructor.h; sourceTree = "<group>"; };
+		1AFE51D41A639353005301A7 /* SKSelectorConstructor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKSelectorConstructor.m; sourceTree = "<group>"; };
+		1AFE51D61A63935C005301A7 /* SKLlamaCaseConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKLlamaCaseConverter.h; sourceTree = "<group>"; };
+		1AFE51D71A63935C005301A7 /* SKLlamaCaseConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKLlamaCaseConverter.m; sourceTree = "<group>"; };
+		1AFE51D91A639366005301A7 /* SKComponentSplitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SKComponentSplitter.h; sourceTree = "<group>"; };
+		1AFE51DA1A639366005301A7 /* SKComponentSplitter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SKComponentSplitter.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,8 +103,7 @@
 				1A952BAA1A61C61A00C6AAC1 /* DetailViewController.h */,
 				1A952BAB1A61C61A00C6AAC1 /* DetailViewController.m */,
 				1A952BAD1A61C61A00C6AAC1 /* Main.storyboard */,
-				1A952BC91A61C63E00C6AAC1 /* SKStateMachine.h */,
-				1A952BCA1A61C63E00C6AAC1 /* SKStateMachine.m */,
+				1AFE51D21A639344005301A7 /* State Machine */,
 				1A952BB01A61C61A00C6AAC1 /* Images.xcassets */,
 				1A952BB21A61C61A00C6AAC1 /* LaunchScreen.xib */,
 				1A952BA01A61C61A00C6AAC1 /* Supporting Files */,
@@ -127,6 +135,21 @@
 				1A952BBE1A61C61A00C6AAC1 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1AFE51D21A639344005301A7 /* State Machine */ = {
+			isa = PBXGroup;
+			children = (
+				1A952BC91A61C63E00C6AAC1 /* SKStateMachine.h */,
+				1A952BCA1A61C63E00C6AAC1 /* SKStateMachine.m */,
+				1AFE51D31A639353005301A7 /* SKSelectorConstructor.h */,
+				1AFE51D41A639353005301A7 /* SKSelectorConstructor.m */,
+				1AFE51D61A63935C005301A7 /* SKLlamaCaseConverter.h */,
+				1AFE51D71A63935C005301A7 /* SKLlamaCaseConverter.m */,
+				1AFE51D91A639366005301A7 /* SKComponentSplitter.h */,
+				1AFE51DA1A639366005301A7 /* SKComponentSplitter.m */,
+			);
+			name = "State Machine";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -229,11 +252,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1AFE51DB1A639366005301A7 /* SKComponentSplitter.m in Sources */,
 				1A952BA61A61C61A00C6AAC1 /* AppDelegate.m in Sources */,
 				1A952BCB1A61C63E00C6AAC1 /* SKStateMachine.m in Sources */,
 				1A952BA91A61C61A00C6AAC1 /* MasterViewController.m in Sources */,
+				1AFE51D51A639353005301A7 /* SKSelectorConstructor.m in Sources */,
 				1A952BA31A61C61A00C6AAC1 /* main.m in Sources */,
 				1A952BAC1A61C61A00C6AAC1 /* DetailViewController.m in Sources */,
+				1AFE51D81A63935C005301A7 /* SKLlamaCaseConverter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +450,7 @@
 				1A952BC51A61C61B00C6AAC1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1A952BC61A61C61B00C6AAC1 /* Build configuration list for PBXNativeTarget "StateMachineTests" */ = {
 			isa = XCConfigurationList;
@@ -432,6 +459,7 @@
 				1A952BC81A61C61B00C6AAC1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

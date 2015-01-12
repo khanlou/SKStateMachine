@@ -10,6 +10,9 @@
 #import <XCTest/XCTest.h>
 
 #import "SKStateMachine.h"
+#import "SKSelectorConstructor.h"
+#import "SKLlamaCaseConverter.h"
+#import "SKComponentSplitter.h"
 
 @interface SKStateMachineDelegate : NSObject
 
